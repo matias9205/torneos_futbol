@@ -1,0 +1,13 @@
+.env
+.ipynb_checkpoints
+credentials
+secrets.toml
+__pycache__
+GUIA_POSIBLES_ANALITICAS.txt
+google_sheets_credentials
+config.toml
+CSV
+myenv
+XLSX
+*.pbix
+work_in_progress
