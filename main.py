@@ -12,8 +12,8 @@ BASE_URL = "https://www.resultados-futbol.com"
 
 args = sys.argv[1:]
 print(args)
-year = [arg for arg in args if len(arg) == 4]
-tournament = [arg for arg in args if len(arg)>4]
+year = [arg for arg in args if len(arg) == 4 and arg.isdigit()]
+tournament = [arg for arg in args if re.match(r"^[a-zA-Z_]+$", arg)]
 print({'years': year, 'tournament': tournament})
 tournaments_input =pd.read_csv("tournaments_input_V2.csv")
 
@@ -128,7 +128,7 @@ def get_match_data(url, año, pais, torneo):
     for div_scor in div_scores:
         sp = div_scor.text.strip()
         scores.append(sp)
-    scores = "-".join(scores)
+    scores = " - ".join(scores)
     ul_tournament_name = soup.find("ul", id="crumbs")
     li_tournament_name = (
         [li for li in ul_tournament_name if ul_tournament_name and "\n" not in li]
@@ -327,6 +327,27 @@ def save_csv_by_tournament_and_year(data_torneos):
         group.to_csv(filepath, index=False, encoding="utf-8-sig")
         print(f"Archivo guardado: {filepath}")
 
+# def transform_and_save(df):
+#     output_dir = "CSV"
+#     os.makedirs(output_dir, exist_ok=True)  # Crear directorio si no existe
+    
+#     for index, row in df.iterrows():
+#         match_statistics_json = json.loads(row['match_statistics'])
+#         if match_statistics_json:
+#             df_ = pd.json_normalize(match_statistics_json)
+#             df_combined = pd.concat([row.drop('match_statistics').to_frame().T, df_], axis=1)  # Combinar datos
+
+#             torneo = row["tournament"]
+#             año = row["year"]
+#             filename = f"{torneo}_{año}.csv".replace(" ", "_").replace("/", "_")
+#             filepath = os.path.join(output_dir, filename)
+
+#             if os.path.exists(filepath):
+#                 df_combined.to_csv(filepath, mode='a', header=False, index=False, encoding="utf-8-sig")  # Agregar datos
+#             else:
+#                 df_combined.to_csv(filepath, mode='w', header=True, index=False, encoding="utf-8-sig")  # Crear nuevo archivo
+#             print(f"Guardado: {filepath} - Fila {index+1}")
+
 if __name__ == "__main__":
     tournaments_input = fetch_links()
     data_torneos = get_match_links(tournaments_input)
@@ -348,3 +369,9 @@ if __name__ == "__main__":
         if col == 'match_statistics':
             data_torneos_final.drop(col, axis=1, inplace=True)
     save_csv_by_tournament_and_year(data_torneos_final)
+    # print(f"Shape inicial: {data_torneos.shape}")
+    # print(f"Columnas iniciales: {data_torneos.columns}")
+
+    # transform_and_save(data_torneos)
+
+    # print("Procesamiento y guardado completado.")
